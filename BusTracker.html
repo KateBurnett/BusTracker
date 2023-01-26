@@ -4,20 +4,63 @@
 <meta charset="utf-8" />
 <title>Real Time Bus Tracker</title>
 <meta name="viewport" content="initial-scale=1,maximum-scale=1,user-scalable=no" />
-<script src="https://api.mapbox.com/mapbox-gl-js/v1.11.0/mapbox-gl.js"></script>
-<link href="https://api.mapbox.com/mapbox-gl-js/v1.11.0/mapbox-gl.css" rel="stylesheet" />
-<script src="BusTracker.js"></script>
-<link rel=¨stylesheet¨ type=¨text/css¨ href=¨BusTracker.css¨>
+<script src="https://api.mapbox.com/mapbox-gl-js/v2.12.0/mapbox-gl.js"></script>
+<link href="https://api.mapbox.com/mapbox-gl-js/v2.12.0/mapbox-gl.css" rel="stylesheet" />
+<style>
+  body { margin: 0; padding: 0; }
+  #map { position: absolute; top: 0; bottom: 0; width: 100%; }
+  .map-overlay{
+    position: absolute;
+    left: 0;
+    padding: 10 px;
+  }
+</style>
 </head>
 <body>
 
 <div id="map"></div>
 
 <div class="map-overlay top">
-  <button style="font-size: 2em;" onclick="move()">
-    Show stops between Harvard and MIT
-  </button>
 </div>
+
+<script>
+mapboxgl.accessToken = 'pk.eyJ1IjoiY2J1cm5ldHQxOCIsImEiOiJjbGQyOWx0djkwMGY4M25ydnBsMW1xOTFyIn0.8XLMGdI939rB_j9W-0e4cQ';
+
+const map = new mapboxgl.Map({
+    container: 'map',
+    style: 'mapbox://styles/mapbox/streets-v11',
+    center: [-71.12022,42.37323],
+    zoom: 11,
+});
+
+// create marker
+var marker = new mapboxgl.Marker()
+    .setLngLat([-71.091542,42.358862])
+    .addTo(map);
+
+// Request 1 bus data from MBTA
+async function getBusLocations(){
+	const response = await fetch('https://api-v3.mbta.com/vehicles?filter[route]=1&include=trip');
+	const json     = await response.json();
+	return json.data;
+}
+
+//Display bus data
+async function updateSource(){ 
+	const locations = await getBusLocations();
+	console.log(new Date());
+  console.log(locations);
+  // Store the marker's longitude and latitude coordinates in a variable
+  const lngLat = marker.getLngLat();
+  // Print the marker's longitude and latitude values in the console
+  console.log(`Longitude: ${lngLat.lng}, Latitude: ${lngLat.lat}`);
+	
+	setTimeout(updateSource, 5000);
+}
+
+updateSource();
+
+</script>
 
 </body>
 </html>
